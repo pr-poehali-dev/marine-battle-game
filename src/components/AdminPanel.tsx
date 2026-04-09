@@ -156,17 +156,12 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       {/* Header */}
-      <div className="text-center">
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <span className="text-3xl animate-float inline-block">⚓</span>
-          <h2 className="font-russo text-2xl md:text-3xl glow-text" style={{ color: '#00e5ff' }}>
-            ПАНЕЛЬ АДМИРАЛА
-          </h2>
-          <span className="text-3xl">🗺️</span>
+      <div className="flex items-center gap-3">
+        <div className="icon-badge icon-badge-navy w-12 h-12 text-xl animate-float">⚓</div>
+        <div>
+          <h2 className="font-russo text-2xl" style={{ color: 'var(--sea-navy)' }}>Панель адмирала</h2>
+          <p className="text-sm" style={{ color: 'rgba(13,59,110,0.5)' }}>Расставь корабли, настрой бонусы и управляй адмиралами</p>
         </div>
-        <p className="text-sm" style={{ color: 'rgba(140,200,230,0.7)' }}>
-          Расставь корабли, настрой бонусы и управляй адмиралами
-        </p>
       </div>
 
       {/* Section tabs */}
@@ -187,15 +182,15 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
 
         {/* Game toggle */}
         <div className="ml-auto flex items-center gap-3 px-4 py-2 rounded-xl sea-card">
-          <span className="text-sm font-semibold" style={{ color: 'rgba(180,220,250,0.9)' }}>Игра</span>
+          <span className="text-sm font-semibold" style={{ color: 'var(--sea-navy)' }}>Игра</span>
           <button
             onClick={() => onGameToggle(!gameActive)}
             className="relative w-12 h-6 rounded-full transition-all"
-            style={{ background: gameActive ? 'linear-gradient(90deg,#00c853,#00e676)' : 'rgba(80,80,100,0.5)', border: `1px solid ${gameActive ? 'rgba(0,230,120,.5)' : 'rgba(150,150,180,.3)'}` }}
+            style={{ background: gameActive ? 'linear-gradient(90deg,#16a34a,#22c55e)' : 'rgba(180,190,210,0.4)', border: `1px solid ${gameActive ? 'rgba(22,163,74,.4)' : 'rgba(14,127,194,.2)'}` }}
           >
-            <div className={`absolute top-0.5 w-5 h-5 rounded-full transition-all bg-white shadow-md ${gameActive ? 'left-6' : 'left-0.5'}`} />
+            <div className={`absolute top-0.5 w-5 h-5 rounded-full transition-all bg-white shadow-sm ${gameActive ? 'left-6' : 'left-0.5'}`} />
           </button>
-          <span className="text-xs font-bold" style={{ color: gameActive ? '#00e676' : 'rgba(200,200,220,0.5)' }}>
+          <span className="text-xs font-bold" style={{ color: gameActive ? '#16a34a' : 'rgba(13,59,110,0.35)' }}>
             {gameActive ? 'ВКЛ' : 'ВЫКЛ'}
           </span>
         </div>
@@ -205,7 +200,7 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
       {activeSection === 'ships' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="sea-card p-4 flex flex-col gap-4">
-            <h3 className="font-russo text-sm uppercase tracking-wider" style={{ color: '#00e5ff' }}>🚢 Выбор корабля</h3>
+            <div className="flex items-center gap-2"><div className="icon-badge icon-badge-blue w-8 h-8"><Icon name="Ship" size={15} /></div><span className="font-russo text-sm" style={{ color: 'var(--sea-navy)' }}>Выбор корабля</span></div>
             <div className="flex flex-col gap-2">
               {([4, 3, 2, 1] as const).map(size => {
                 const count = shipCounts[size];
@@ -217,25 +212,25 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
                     key={size}
                     onClick={() => available && setSelectedShipSize(size)}
                     className={`flex items-center gap-3 p-3 rounded-xl transition-all text-left border ${isSelected ? 'sea-card-selected' : 'border-transparent'} ${!available ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:border-cyan-700/40'}`}
-                    style={{ background: isSelected ? 'linear-gradient(135deg,rgba(0,170,230,0.22),rgba(0,80,170,0.18))' : 'rgba(0,15,45,0.45)' }}
+                    style={{ background: isSelected ? 'rgba(14,127,194,0.07)' : 'transparent' }}
                   >
                     <div className="flex gap-1">
                       {Array.from({ length: size }).map((_, i) => (
-                        <div key={i} className="w-5 h-5 rounded-sm" style={{ background: isSelected ? 'rgba(0,200,255,0.8)' : 'rgba(20,96,180,0.8)', border: `1px solid ${isSelected ? 'rgba(0,229,255,0.7)' : 'rgba(0,160,220,0.5)'}` }} />
+                        <div key={i} className="w-5 h-5 rounded-sm" style={{ background: isSelected ? 'rgba(14,127,194,0.75)' : 'rgba(30,111,168,0.55)', border: `1px solid ${isSelected ? 'rgba(14,127,194,0.6)' : 'rgba(14,127,194,0.35)'}` }} />
                       ))}
                     </div>
                     <div className="flex-1">
-                      <div className="text-sm font-semibold" style={{ color: 'rgba(210,240,255,0.95)' }}>{size}-палубный</div>
+                      <div className="text-sm font-semibold" style={{ color: 'var(--sea-navy)' }}>{size}-палубный</div>
                       <div className="text-xs gold-text">+{customPrizes[size].toLocaleString()}₽</div>
                     </div>
-                    <div className="text-xs font-bold" style={{ color: count >= max ? 'rgba(255,100,100,.8)' : 'rgba(0,220,130,.8)' }}>{count}/{max}</div>
+                    <div className="text-xs font-bold" style={{ color: count >= max ? '#dc2626' : '#16a34a' }}>{count}/{max}</div>
                   </button>
                 );
               })}
             </div>
 
             <div>
-              <label className="text-xs uppercase tracking-wider mb-2 block" style={{ color: 'rgba(140,200,230,0.6)' }}>Ориентация</label>
+              <label className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'rgba(13,59,110,0.45)' }}>Ориентация</label>
               <div className="flex gap-2">
                 {[{ key: 'h', label: '↔ Горизонтально' }, { key: 'v', label: '↕ Вертикально' }].map(opt => (
                   <button key={opt.key} onClick={() => setOrientation(opt.key as 'h' | 'v')}
@@ -246,7 +241,7 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 mt-auto pt-2 border-t" style={{ borderColor: 'rgba(0,120,180,0.2)' }}>
+            <div className="flex flex-col gap-2 mt-auto pt-2 border-t" style={{ borderColor: 'rgba(14,127,194,0.12)' }}>
               <button onClick={handleApply} className="btn-gold w-full py-3 rounded-xl font-russo text-sm">
                 ✅ Применить расстановку
               </button>
@@ -260,18 +255,18 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
           <div className="lg:col-span-2">
             <div className="sea-card p-4">
               <div className="flex items-center gap-2 mb-3">
-                <Icon name="Eye" size={14} style={{ color: '#00e5ff' }} />
-                <span className="font-russo text-xs uppercase tracking-wider" style={{ color: '#00e5ff' }}>Карта адмирала — видны все корабли</span>
+                <div className="icon-badge icon-badge-blue w-7 h-7"><Icon name="Eye" size={13} /></div>
+                <span className="font-russo text-xs uppercase tracking-wider" style={{ color: 'var(--sea-blue)' }}>Карта адмирала — видны все корабли</span>
               </div>
               <div className="flex mb-1">
                 <div className="w-7 shrink-0" />
                 {COLS.map(col => (
-                  <div key={col} className="flex-1 text-center text-xs font-russo" style={{ color: 'rgba(0,200,230,0.55)' }}>{col}</div>
+                  <div key={col} className="flex-1 text-center text-xs font-russo" style={{ color: 'rgba(14,127,194,0.5)' }}>{col}</div>
                 ))}
               </div>
               {adminBoard.map((row, ri) => (
                 <div key={ri} className="flex mb-px">
-                  <div className="w-7 shrink-0 text-xs font-russo flex items-center justify-end pr-1" style={{ color: 'rgba(0,200,230,0.55)' }}>{ROWS[ri]}</div>
+                  <div className="w-7 shrink-0 text-xs font-russo flex items-center justify-end pr-1" style={{ color: 'rgba(14,127,194,0.5)' }}>{ROWS[ri]}</div>
                   {row.map((cell, ci) => (
                     <div
                       key={ci}
@@ -282,8 +277,8 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
                       onClick={() => handlePlaceShip(ri, ci)}
                     >
                       {cell.state === 'ship' && shots.find(s => s.row === ri && s.col === ci) ? <span className="text-sm">🔥</span> : null}
-                      {cell.state === 'ship' && !shots.find(s => s.row === ri && s.col === ci) ? <span style={{ fontSize: '8px', color: 'rgba(80,180,240,0.8)' }}>■</span> : null}
-                      {cell.state !== 'ship' && shots.find(s => s.row === ri && s.col === ci && s.result === 'miss') ? <span style={{ color: 'rgba(100,170,210,0.45)', fontSize: '10px' }}>●</span> : null}
+                      {cell.state === 'ship' && !shots.find(s => s.row === ri && s.col === ci) ? <span style={{ fontSize: '8px', color: 'rgba(14,127,194,0.7)' }}>■</span> : null}
+                      {cell.state !== 'ship' && shots.find(s => s.row === ri && s.col === ci && s.result === 'miss') ? <span style={{ color: 'rgba(14,127,194,0.35)', fontSize: '10px' }}>●</span> : null}
                     </div>
                   ))}
                 </div>
@@ -292,14 +287,14 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
 
             {adminShips.length > 0 && (
               <div className="sea-card p-4 mt-3">
-                <div className="font-russo text-xs mb-2 uppercase tracking-wider" style={{ color: '#00e5ff' }}>
+                <div className="font-russo text-xs mb-2 uppercase tracking-wider" style={{ color: 'var(--sea-blue)' }}>
                   Расставлено: {adminShips.length} кораблей
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {adminShips.map(ship => (
                     <div key={ship.id} className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
-                      style={{ background: 'rgba(0,30,80,0.6)', border: '1px solid rgba(0,120,190,0.35)' }}>
-                      <span className="text-xs font-bold" style={{ color: 'rgba(140,210,255,0.9)' }}>{ship.size}-пал.</span>
+                      style={{ background: 'rgba(14,127,194,0.07)', border: '1px solid rgba(14,127,194,0.2)' }}>
+                      <span className="text-xs font-bold" style={{ color: 'var(--sea-blue)' }}>{ship.size}-пал.</span>
                       <span className="text-xs gold-text">+{ship.prize.toLocaleString()}₽</span>
                       <button onClick={() => handleRemoveShip(ship.id)} className="text-red-400 hover:text-red-300 transition-colors">
                         <Icon name="X" size={11} />
@@ -320,8 +315,8 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
             <div className="flex items-center gap-3 mb-5">
               <span className="text-2xl">💰</span>
               <div>
-                <div className="font-russo text-base" style={{ color: '#00e5ff' }}>Настройка бонусов за потопленные корабли</div>
-                <div className="text-xs mt-0.5" style={{ color: 'rgba(140,200,230,0.6)' }}>Изменения применяются к новым расстановкам кораблей</div>
+                <div className="font-russo text-base" style={{ color: 'var(--sea-navy)' }}>Настройка бонусов за потопленные корабли</div>
+                <div className="text-xs mt-0.5" style={{ color: 'rgba(13,59,110,0.5)' }}>Изменения применяются к новым расстановкам кораблей</div>
               </div>
             </div>
 
@@ -329,12 +324,12 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
               {([1, 2, 3, 4] as const).map(size => {
                 const shipEmojis = { 1: '🚤', 2: '⛵', 3: '🛥️', 4: '🚢' };
                 return (
-                  <div key={size} className="p-4 rounded-2xl" style={{ background: 'rgba(0,20,55,0.6)', border: '1px solid rgba(0,130,190,0.3)' }}>
+                  <div key={size} className="p-4 rounded-2xl" style={{ background: 'rgba(14,127,194,0.04)', border: '1px solid rgba(14,127,194,0.15)' }}>
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-2xl">{shipEmojis[size]}</span>
                       <div>
-                        <div className="font-russo text-sm" style={{ color: 'rgba(200,235,255,0.92)' }}>{size}-палубный корабль</div>
-                        <div className="text-xs" style={{ color: 'rgba(120,180,220,0.6)' }}>При потоплении</div>
+                        <div className="font-russo text-sm" style={{ color: 'var(--sea-navy)' }}>{size}-палубный корабль</div>
+                        <div className="text-xs" style={{ color: 'rgba(13,59,110,0.45)' }}>При потоплении</div>
                       </div>
                     </div>
 
@@ -363,7 +358,7 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
                           min="0"
                           step="500"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'rgba(120,180,220,0.6)' }}>₽</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'rgba(13,59,110,0.4)' }}>₽</span>
                       </div>
                       <div className="text-sm font-russo gold-text whitespace-nowrap">
                         = {customPrizes[size].toLocaleString()}₽
@@ -375,14 +370,16 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
             </div>
 
             <div className="mt-5 p-4 rounded-2xl flex items-center gap-4"
-              style={{ background: 'linear-gradient(135deg,rgba(0,50,30,0.5),rgba(0,30,70,0.6))', border: '1px solid rgba(0,200,100,0.25)' }}>
-              <span className="text-2xl">📊</span>
+              style={{ background: 'linear-gradient(135deg,rgba(240,253,244,0.8),rgba(220,252,231,0.5))', border: '1px solid rgba(22,163,74,0.2)' }}>
+              <div className="icon-badge icon-badge-green w-12 h-12 flex-shrink-0">
+                <Icon name="Banknote" size={22} />
+              </div>
               <div>
-                <div className="text-sm font-semibold" style={{ color: 'rgba(180,240,200,0.9)' }}>Максимальный банк за партию</div>
+                <div className="text-sm font-semibold" style={{ color: '#15803d' }}>Максимальный банк за партию</div>
                 <div className="font-russo text-xl gold-text">
                   {(customPrizes[4] * 1 + customPrizes[3] * 2 + customPrizes[2] * 3 + customPrizes[1] * 4).toLocaleString()}₽
                 </div>
-                <div className="text-xs mt-0.5" style={{ color: 'rgba(120,180,150,0.6)' }}>
+                <div className="text-xs mt-0.5" style={{ color: 'rgba(21,128,61,0.55)' }}>
                   Если потопить все корабли (10 штук)
                 </div>
               </div>
@@ -396,8 +393,8 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
         <div className="flex flex-col gap-4 animate-fade-in">
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-russo text-sm uppercase tracking-wider" style={{ color: '#00e5ff' }}>⚓ Управление адмиралами</div>
-              <div className="text-xs mt-1" style={{ color: 'rgba(140,200,230,0.6)' }}>Адмиралы имеют доступ к расстановке кораблей и настройкам игры</div>
+              <div className="flex items-center gap-2"><div className="icon-badge icon-badge-navy w-8 h-8"><Icon name="Shield" size={15} /></div><span className="font-russo text-sm" style={{ color: 'var(--sea-navy)' }}>Управление адмиралами</span></div>
+              <div className="text-xs mt-1" style={{ color: 'rgba(13,59,110,0.5)' }}>Адмиралы имеют доступ к расстановке кораблей и настройкам игры</div>
             </div>
             <button onClick={() => setShowAddAdmiral(!showAddAdmiral)} className="btn-gold px-4 py-2.5 rounded-xl text-sm font-russo flex items-center gap-2">
               <Icon name="UserPlus" size={16} />
@@ -407,11 +404,11 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
 
           {/* Add form */}
           {showAddAdmiral && (
-            <div className="sea-card p-5 animate-scale-in" style={{ border: '1px solid rgba(255,215,0,0.3)' }}>
-              <div className="font-russo text-sm mb-4" style={{ color: '#ffd700' }}>⚓ Новый адмирал</div>
+            <div className="sea-card p-5 animate-scale-in" style={{ border: '1px solid rgba(14,127,194,0.25)' }}>
+              <div className="flex items-center gap-2 mb-4"><div className="icon-badge icon-badge-blue w-8 h-8"><Icon name="UserPlus" size={15} /></div><span className="font-russo text-sm" style={{ color: 'var(--sea-navy)' }}>Новый адмирал</span></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs uppercase tracking-wider mb-1.5 block" style={{ color: 'rgba(140,200,230,0.6)' }}>Имя и фамилия</label>
+                  <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: 'rgba(13,59,110,0.45)' }}>Имя и фамилия</label>
                   <input
                     value={newAdmiral.name}
                     onChange={e => setNewAdmiral(a => ({ ...a, name: e.target.value }))}
@@ -420,7 +417,7 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
                   />
                 </div>
                 <div>
-                  <label className="text-xs uppercase tracking-wider mb-1.5 block" style={{ color: 'rgba(140,200,230,0.6)' }}>PIN-код доступа (4+ цифр)</label>
+                  <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: 'rgba(13,59,110,0.45)' }}>PIN-код доступа (4+ цифр)</label>
                   <input
                     value={newAdmiral.pin}
                     onChange={e => setNewAdmiral(a => ({ ...a, pin: e.target.value.replace(/\D/g, '').slice(0, 8) }))}
@@ -433,14 +430,14 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
               </div>
 
               <div className="mt-3">
-                <label className="text-xs uppercase tracking-wider mb-2 block" style={{ color: 'rgba(140,200,230,0.6)' }}>Значок</label>
+                <label className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'rgba(13,59,110,0.45)' }}>Значок</label>
                 <div className="flex gap-2">
                   {ADMIRAL_AVATARS.map(av => (
                     <button
                       key={av}
                       onClick={() => setNewAdmiral(a => ({ ...a, avatar: av }))}
-                      className={`text-2xl p-2 rounded-xl transition-all ${newAdmiral.avatar === av ? 'scale-125' : 'opacity-60 hover:opacity-100'}`}
-                      style={{ background: newAdmiral.avatar === av ? 'rgba(0,180,220,0.3)' : 'rgba(0,20,55,0.4)', border: `1px solid ${newAdmiral.avatar === av ? 'rgba(0,229,255,.6)' : 'transparent'}` }}
+                      className={`text-2xl p-2 rounded-xl transition-all ${newAdmiral.avatar === av ? 'scale-110' : 'opacity-50 hover:opacity-80'}`}
+                      style={{ background: newAdmiral.avatar === av ? 'rgba(14,127,194,0.12)' : 'rgba(14,127,194,0.04)', border: `1px solid ${newAdmiral.avatar === av ? 'rgba(14,127,194,0.4)' : 'rgba(14,127,194,0.1)'}` }}
                     >
                       {av}
                     </button>
@@ -462,33 +459,37 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
           {/* Admirals list */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {admirals.map((admiral, idx) => (
-              <div key={admiral.id} className="sea-card p-4 flex items-start gap-3 transition-all hover:scale-105 animate-fade-in"
-                style={{ animationDelay: `${idx * 0.08}s`, border: '1px solid rgba(255,215,0,0.2)' }}>
+              <div key={admiral.id} className="sea-card p-4 flex items-start gap-3 transition-all hover:scale-[1.02] animate-fade-in"
+                style={{ animationDelay: `${idx * 0.08}s` }}>
                 <div className="relative">
-                  <span className="text-4xl">{admiral.avatar}</span>
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full animate-pulse-glow"
-                    style={{ background: 'rgba(0,229,255,0.9)' }} />
+                  <div className="icon-badge icon-badge-navy w-14 h-14 text-3xl">{admiral.avatar}</div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white"
+                    style={{ background: '#16a34a' }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-russo text-sm" style={{ color: 'rgba(220,245,255,0.95)' }}>{admiral.name}</div>
-                  <div className="text-xs mt-0.5" style={{ color: 'rgba(100,170,210,0.6)' }}>Добавлен: {admiral.createdAt}</div>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <Icon name="KeyRound" size={12} style={{ color: 'rgba(255,215,0,0.7)' }} />
-                    <span className="text-xs" style={{ color: 'rgba(255,215,0,0.6)' }}>PIN: {'•'.repeat(admiral.pin.length)}</span>
+                  <div className="font-russo text-sm" style={{ color: 'var(--sea-navy)' }}>{admiral.name}</div>
+                  <div className="text-xs mt-0.5 flex items-center gap-1" style={{ color: 'rgba(13,59,110,0.45)' }}>
+                    <Icon name="Calendar" size={11} /> Добавлен: {admiral.createdAt}
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1.5 px-2 py-1 rounded-lg inline-flex"
+                    style={{ background: 'rgba(245,166,35,0.08)', border: '1px solid rgba(245,166,35,0.2)' }}>
+                    <Icon name="KeyRound" size={12} style={{ color: 'var(--gold-dark)' }} />
+                    <span className="text-xs font-semibold" style={{ color: 'var(--gold-dark)' }}>PIN: {'•'.repeat(admiral.pin.length)}</span>
                   </div>
                 </div>
-                <button onClick={() => handleRemoveAdmiral(admiral.id)} className="p-1.5 rounded-lg transition-all hover:bg-red-500/20"
-                  style={{ color: 'rgba(255,100,100,0.5)' }}>
-                  <Icon name="Trash2" size={14} />
+                <button onClick={() => handleRemoveAdmiral(admiral.id)}
+                  className="p-1.5 rounded-xl transition-all hover:bg-red-50"
+                  style={{ color: 'rgba(220,38,38,0.4)' }}>
+                  <Icon name="Trash2" size={15} />
                 </button>
               </div>
             ))}
           </div>
 
           {/* Info block */}
-          <div className="sea-card p-4 flex items-start gap-3" style={{ border: '1px solid rgba(0,180,100,0.25)', background: 'linear-gradient(135deg,rgba(0,40,20,0.5),rgba(0,20,55,0.8))' }}>
-            <Icon name="Info" size={18} style={{ color: 'rgba(0,220,130,0.8)', flexShrink: 0, marginTop: '2px' }} />
-            <div className="text-sm" style={{ color: 'rgba(160,230,200,0.85)' }}>
+          <div className="sea-card p-4 flex items-start gap-3" style={{ border: '1px solid rgba(14,127,194,0.18)', background: 'linear-gradient(135deg,rgba(239,246,255,0.8),rgba(255,255,255,0.6))' }}>
+            <div className="icon-badge icon-badge-blue w-9 h-9 flex-shrink-0 mt-0.5"><Icon name="Info" size={16} /></div>
+            <div className="text-sm" style={{ color: 'rgba(13,59,110,0.7)' }}>
               Адмирал — это роль с правом расставлять корабли, менять бонусы и управлять игрой. При входе в режим адмирала можно будет вводить PIN для авторизации. Это защитит настройки от случайных изменений игроками.
             </div>
           </div>

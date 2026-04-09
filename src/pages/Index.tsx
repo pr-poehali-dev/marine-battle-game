@@ -10,38 +10,30 @@ import Icon from '@/components/ui/icon';
 
 type Tab = 'game' | 'admin' | 'leaderboard' | 'history' | 'players' | 'stats';
 
-const TABS: { id: Tab; label: string; icon: string; adminOnly?: boolean }[] = [
-  { id: 'game', label: 'Игровое поле', icon: '🎯' },
-  { id: 'leaderboard', label: 'Рейтинг', icon: '🏆' },
-  { id: 'history', label: 'История', icon: '📋' },
-  { id: 'stats', label: 'Статистика', icon: '📊' },
-  { id: 'players', label: 'Игроки', icon: '👥' },
-  { id: 'admin', label: 'Адмирал', icon: '⚓', adminOnly: true },
+const TABS: { id: Tab; label: string; iconName: string; adminOnly?: boolean }[] = [
+  { id: 'game',        label: 'Игровое поле', iconName: 'Crosshair' },
+  { id: 'leaderboard', label: 'Рейтинг',      iconName: 'Trophy' },
+  { id: 'history',     label: 'История',       iconName: 'ScrollText' },
+  { id: 'stats',       label: 'Статистика',    iconName: 'BarChart3' },
+  { id: 'players',     label: 'Игроки',        iconName: 'Users' },
+  { id: 'admin',       label: 'Адмирал',       iconName: 'ShieldCheck', adminOnly: true },
 ];
 
-function OceanBubbles() {
-  const bubbles = Array.from({ length: 12 }, (_, i) => ({
-    id: i,
-    size: Math.random() * 20 + 8,
-    left: Math.random() * 100,
-    delay: Math.random() * 8,
-    duration: Math.random() * 6 + 8,
-  }));
+function WaveBg() {
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {bubbles.map(b => (
-        <div
-          key={b.id}
-          className="bubble absolute"
-          style={{
-            width: b.size,
-            height: b.size,
-            left: `${b.left}%`,
-            bottom: '-20px',
-            animationDuration: `${b.duration}s`,
-            animationDelay: `${b.delay}s`,
-          }}
-        />
+    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+      {/* Subtle top gradient band */}
+      <div className="absolute top-0 left-0 right-0 h-64"
+        style={{ background: 'linear-gradient(180deg, rgba(14,127,194,0.07) 0%, transparent 100%)' }} />
+      {/* Floating bubbles */}
+      {Array.from({ length: 8 }, (_, i) => ({
+        size: 12 + i * 6,
+        left: 8 + i * 12,
+        delay: i * 1.8,
+        dur: 9 + i * 1.5,
+      })).map((b, i) => (
+        <div key={i} className="bubble absolute"
+          style={{ width: b.size, height: b.size, left: `${b.left}%`, bottom: '-30px', animationDuration: `${b.dur}s`, animationDelay: `${b.delay}s` }} />
       ))}
     </div>
   );
@@ -63,77 +55,68 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'var(--sea-deep)' }}>
-      <OceanBubbles />
+    <div className="min-h-screen relative" style={{ background: 'var(--sea-bg)' }}>
+      <WaveBg />
 
-      {/* Header */}
-      <header className="relative z-10 px-4 pt-6 pb-4">
+      {/* ── HEADER ── */}
+      <header className="relative z-10 px-4 pt-5 pb-3">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
+          <div className="sea-card px-5 py-3 flex items-center justify-between mb-4"
+            style={{ borderRadius: '18px' }}>
+
+            {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <span className="text-4xl animate-float inline-block">⚓</span>
-                <div
-                  className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
-                  style={{ background: gameActive ? 'rgba(0,220,80,0.9)' : 'rgba(200,50,50,0.9)', boxShadow: gameActive ? '0 0 8px rgba(0,220,80,0.7)' : '0 0 8px rgba(200,50,50,0.7)' }}
-                />
+              <div className="relative animate-float inline-block">
+                <div className="icon-badge icon-badge-blue w-11 h-11 text-2xl rounded-2xl">
+                  ⚓
+                </div>
+                <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white"
+                  style={{ background: gameActive ? '#16a34a' : '#dc2626', boxShadow: `0 0 6px ${gameActive ? 'rgba(22,163,74,0.6)' : 'rgba(220,38,38,0.6)'}` }} />
               </div>
               <div>
-                <h1 className="font-russo text-2xl md:text-3xl" style={{
-                  background: 'linear-gradient(135deg, #7ef4ff, #00d4ff, #0088cc)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  filter: 'drop-shadow(0 0 15px rgba(0,212,255,0.4))'
-                }}>
-                  МОРСКОЙ БОЙ
+                <h1 className="font-russo text-xl leading-tight" style={{ color: 'var(--sea-navy)' }}>
+                  Морской Бой
                 </h1>
-                <div className="text-xs" style={{ color: 'rgba(100,180,220,0.6)' }}>
+                <div className="text-xs font-medium" style={{ color: 'rgba(13,59,110,0.5)' }}>
                   Геймификация продаж · Битрикс24
                 </div>
               </div>
             </div>
 
+            {/* Right controls */}
             <div className="flex items-center gap-2">
-              <div
-                className="px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2"
+              {/* Status */}
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
                 style={{
-                  background: gameActive ? 'rgba(0,80,30,0.5)' : 'rgba(80,20,20,0.5)',
-                  border: `1px solid ${gameActive ? 'rgba(0,200,80,0.4)' : 'rgba(200,50,50,0.4)'}`,
-                  color: gameActive ? 'rgba(100,230,150,0.9)' : 'rgba(230,100,100,0.9)',
-                }}
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full inline-block"
-                  style={{ background: gameActive ? 'rgba(0,220,80,1)' : 'rgba(220,50,50,1)' }}
-                />
-                <span className="hidden sm:inline">{gameActive ? 'Игра активна' : 'Остановлена'}</span>
+                  background: gameActive ? 'rgba(22,163,74,0.1)' : 'rgba(220,38,38,0.08)',
+                  border: `1px solid ${gameActive ? 'rgba(22,163,74,0.3)' : 'rgba(220,38,38,0.25)'}`,
+                  color: gameActive ? '#16a34a' : '#dc2626',
+                }}>
+                <span className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: gameActive ? '#16a34a' : '#dc2626', display: 'inline-block' }} />
+                {gameActive ? 'Игра идёт' : 'Остановлена'}
               </div>
 
-              <button
-                onClick={() => setIsAdmin(!isAdmin)}
-                className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1"
+              {/* Admin toggle */}
+              <button onClick={() => setIsAdmin(!isAdmin)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
                 style={{
-                  background: isAdmin ? 'rgba(255,180,0,0.2)' : 'rgba(0,30,70,0.5)',
-                  border: `1px solid ${isAdmin ? 'rgba(255,180,0,0.5)' : 'rgba(0,100,150,0.3)'}`,
-                  color: isAdmin ? '#ffd700' : 'rgba(150,200,230,0.7)',
-                }}
-              >
-                <Icon name="Shield" size={12} />
-                <span className="hidden sm:inline ml-1">{isAdmin ? 'Режим адмирала' : 'Режим игрока'}</span>
+                  background: isAdmin ? 'rgba(245,166,35,0.12)' : 'rgba(14,127,194,0.07)',
+                  border: `1px solid ${isAdmin ? 'rgba(245,166,35,0.45)' : 'rgba(14,127,194,0.22)'}`,
+                  color: isAdmin ? 'var(--gold-dark)' : 'rgba(13,59,110,0.7)',
+                }}>
+                <Icon name={isAdmin ? 'ShieldCheck' : 'Shield'} size={13} />
+                <span className="hidden sm:inline">{isAdmin ? 'Адмирал' : 'Игрок'}</span>
               </button>
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex gap-1 flex-wrap">
+          {/* ── NAV ── */}
+          <nav className="flex gap-1 flex-wrap px-1">
             {TABS.filter(t => !t.adminOnly || isAdmin).map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`nav-tab flex items-center gap-1.5 ${activeTab === tab.id ? 'active' : ''}`}
-              >
-                <span>{tab.icon}</span>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                className={`nav-tab flex items-center gap-1.5 ${activeTab === tab.id ? 'active' : ''}`}>
+                <Icon name={tab.iconName} size={15} />
                 <span className="hidden sm:inline">{tab.label}</span>
               </button>
             ))}
@@ -141,51 +124,39 @@ export default function Index() {
         </div>
       </header>
 
-      {/* Divider */}
-      <div className="px-4">
-        <div className="max-w-6xl mx-auto h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,180,220,0.3), transparent)' }} />
-      </div>
-
-      {/* Content */}
-      <main className="relative z-10 px-4 py-6 max-w-6xl mx-auto">
+      {/* ── CONTENT ── */}
+      <main className="relative z-10 px-4 py-5 max-w-6xl mx-auto">
         {activeTab === 'game' && (
           <GameBoard
-            board={board}
-            shots={shots}
-            players={players}
-            selectedPlayer={selectedPlayer}
-            onSelectPlayer={setSelectedPlayer}
-            onFire={fireShot}
-            lastExplosion={lastExplosion}
-            gameActive={gameActive}
+            board={board} shots={shots} players={players}
+            selectedPlayer={selectedPlayer} onSelectPlayer={setSelectedPlayer}
+            onFire={fireShot} lastExplosion={lastExplosion} gameActive={gameActive}
           />
         )}
         {activeTab === 'admin' && isAdmin && (
           <AdminPanel
-            board={board}
-            ships={ships}
+            board={board} ships={ships}
             shots={shots.map(s => ({ row: s.row, col: s.col, result: s.result }))}
             gameActive={gameActive}
-            onShipsChange={handleShipsChange}
-            onBoardChange={setBoard}
-            onGameToggle={setGameActive}
-            onReset={resetGame}
+            onShipsChange={handleShipsChange} onBoardChange={setBoard}
+            onGameToggle={setGameActive} onReset={resetGame}
           />
         )}
         {activeTab === 'leaderboard' && <Leaderboard players={players} />}
-        {activeTab === 'history' && <ShotHistory shots={shots} />}
-        {activeTab === 'players' && <Players players={players} onAddPlayer={addPlayer} />}
-        {activeTab === 'stats' && <Statistics players={players} shots={shots} ships={ships} />}
+        {activeTab === 'history'     && <ShotHistory shots={shots} />}
+        {activeTab === 'players'     && <Players players={players} onAddPlayer={addPlayer} />}
+        {activeTab === 'stats'       && <Statistics players={players} shots={shots} ships={ships} />}
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 px-4 py-4 mt-4">
+      {/* ── FOOTER ── */}
+      <footer className="relative z-10 px-4 py-5 mt-4">
+        <div className="max-w-6xl mx-auto sea-divider mb-4" />
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="text-xs" style={{ color: 'rgba(80,130,170,0.4)' }}>
+          <div className="text-xs font-medium" style={{ color: 'rgba(13,59,110,0.35)' }}>
             ⚓ Морской Бой · Геймификация продаж
           </div>
-          <div className="text-xs" style={{ color: 'rgba(80,130,170,0.35)' }}>
-            🔗 Интеграция Битрикс24
+          <div className="text-xs" style={{ color: 'rgba(13,59,110,0.3)' }}>
+            Интеграция Битрикс24
           </div>
         </div>
       </footer>

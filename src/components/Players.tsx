@@ -7,7 +7,7 @@ interface PlayersProps {
   onAddPlayer: (player: Omit<Player, 'id' | 'shotsTotal' | 'hitsTotal' | 'shipsSunk' | 'bonusEarned'>) => void;
 }
 
-const AVATARS = ['👨‍💼', '👩‍💼', '👨‍💻', '👩‍💻', '🧑‍🎯', '👨‍🚀', '👩‍🚀', '🧑‍💼', '👨‍🔬', '👩‍🔬'];
+const AVATARS = ['👨‍💼','👩‍💼','👨‍💻','👩‍💻','🧑‍🎯','👨‍🚀','👩‍🚀','🧑‍💼','👨‍🔬','👩‍🔬'];
 
 export default function Players({ players, onAddPlayer }: PlayersProps) {
   const [showForm, setShowForm] = useState(false);
@@ -21,121 +21,110 @@ export default function Players({ players, onAddPlayer }: PlayersProps) {
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in">
-      <div className="text-center">
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <span className="text-3xl animate-float inline-block">👥</span>
-          <h2 className="font-russo text-2xl md:text-3xl glow-text" style={{ color: '#00d4ff' }}>
-            УПРАВЛЕНИЕ ИГРОКАМИ
-          </h2>
-          <span className="text-3xl animate-float inline-block" style={{ animationDelay: '0.3s' }}>⚓</span>
+    <div className="flex flex-col gap-5 animate-fade-in">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="icon-badge icon-badge-teal w-12 h-12 text-xl animate-float">👥</div>
+        <div>
+          <h2 className="font-russo text-2xl" style={{ color: 'var(--sea-navy)' }}>Игроки</h2>
+          <p className="text-sm" style={{ color: 'rgba(13,59,110,0.5)' }}>Управление командой и интеграция с Битрикс24</p>
         </div>
-        <p className="text-sm" style={{ color: 'rgba(150,200,230,0.7)' }}>
-          Добавляй сотрудников из Битрикс24 или вручную
-        </p>
       </div>
 
-      {/* Bitrix24 integration block */}
-      <div className="sea-card p-5" style={{ border: '1px solid rgba(255,180,0,0.3)', background: 'linear-gradient(135deg, rgba(20,50,30,0.6), rgba(10,30,70,0.9))' }}>
+      {/* Bitrix24 block */}
+      <div className="sea-card p-5" style={{ border: '1px solid rgba(22,163,74,0.2)', background: 'linear-gradient(135deg,rgba(240,253,244,0.8),#ffffff)' }}>
         <div className="flex items-start gap-4">
-          <div className="text-4xl">🔗</div>
+          <div className="icon-badge icon-badge-green w-14 h-14 text-3xl flex-shrink-0">🔗</div>
           <div className="flex-1">
-            <div className="font-russo text-sm mb-1" style={{ color: '#ffd700' }}>
-              ИНТЕГРАЦИЯ С БИТРИКС24
-            </div>
-            <div className="text-sm mb-3" style={{ color: 'rgba(180,220,200,0.8)' }}>
-              Подключите Битрикс24 для автоматической синхронизации сотрудников, сделок и начисления выстрелов при закрытии продажи
+            <div className="font-russo text-base mb-1" style={{ color: '#15803d' }}>Интеграция с Битрикс24</div>
+            <div className="text-sm mb-4" style={{ color: 'rgba(21,128,61,0.75)' }}>
+              Подключите Битрикс24 для автоматической синхронизации сотрудников и выстрелов при закрытии сделки
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
               {[
-                { icon: '👤', text: 'Синхронизация контактов и сотрудников' },
-                { icon: '💼', text: 'Автовыстрел при закрытии сделки' },
-                { icon: '📊', text: 'Статистика продаж в игре' },
+                { iconName: 'UserCheck',  text: 'Синхронизация сотрудников', badge: 'icon-badge-green' },
+                { iconName: 'Zap',        text: 'Автовыстрел при закрытии сделки', badge: 'icon-badge-green' },
+                { iconName: 'BarChart2',  text: 'Статистика продаж в игре', badge: 'icon-badge-green' },
               ].map(item => (
-                <div key={item.text} className="flex items-start gap-2 p-2 rounded-lg"
-                  style={{ background: 'rgba(0,40,20,0.4)', border: '1px solid rgba(0,200,100,0.2)' }}>
-                  <span>{item.icon}</span>
-                  <span className="text-xs" style={{ color: 'rgba(150,220,180,0.8)' }}>{item.text}</span>
+                <div key={item.text} className="flex items-start gap-2.5 p-3 rounded-2xl"
+                  style={{ background: 'rgba(22,163,74,0.07)', border: '1px solid rgba(22,163,74,0.15)' }}>
+                  <div className={`icon-badge ${item.badge} w-8 h-8 flex-shrink-0 mt-0.5`}>
+                    <Icon name={item.iconName} size={14} />
+                  </div>
+                  <span className="text-xs font-medium leading-snug" style={{ color: 'rgba(21,128,61,0.85)' }}>{item.text}</span>
                 </div>
               ))}
             </div>
             <div className="flex flex-wrap gap-3">
-              <button className="btn-gold px-4 py-2 rounded-xl text-sm font-russo">
-                🔗 Подключить Битрикс24
+              <button className="btn-gold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2">
+                <Icon name="Link2" size={15} /> Подключить Битрикс24
               </button>
-              <div className="px-4 py-2 rounded-xl text-xs flex items-center gap-2"
-                style={{ background: 'rgba(0,30,60,0.5)', border: '1px solid rgba(0,100,150,0.3)', color: 'rgba(150,200,230,0.8)' }}>
-                <span className="w-2 h-2 rounded-full inline-block" style={{ background: 'rgba(200,200,0,0.7)' }} />
-                Требуется настройка Webhook
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium"
+                style={{ background: 'rgba(22,163,74,0.07)', border: '1px solid rgba(22,163,74,0.2)', color: 'rgba(21,128,61,0.7)' }}>
+                <Icon name="Info" size={13} /> Требуется настройка Webhook
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Add player */}
-      <div className="flex justify-between items-center">
-        <h3 className="font-russo text-sm uppercase tracking-wider" style={{ color: '#00d4ff' }}>
-          Список игроков ({players.length})
-        </h3>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="btn-sea px-4 py-2 rounded-xl text-sm flex items-center gap-2"
-        >
-          <Icon name="UserPlus" size={16} />
-          Добавить вручную
+      {/* List header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="icon-badge icon-badge-blue w-8 h-8">
+            <Icon name="Users" size={15} />
+          </div>
+          <span className="font-russo text-sm" style={{ color: 'var(--sea-navy)' }}>
+            Список игроков ({players.length})
+          </span>
+        </div>
+        <button onClick={() => setShowForm(!showForm)}
+          className="btn-sea px-4 py-2 rounded-xl text-sm flex items-center gap-2">
+          <Icon name="UserPlus" size={15} /> Добавить
         </button>
       </div>
 
       {/* Add form */}
       {showForm && (
-        <div className="sea-card p-4 animate-scale-in">
-          <div className="font-russo text-sm mb-4" style={{ color: '#00d4ff' }}>➕ Новый игрок</div>
+        <div className="sea-card p-5 animate-scale-in" style={{ border: '1px solid rgba(14,127,194,0.25)' }}>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="icon-badge icon-badge-blue w-8 h-8"><Icon name="UserPlus" size={15} /></div>
+            <span className="font-russo text-sm" style={{ color: 'var(--sea-navy)' }}>Новый игрок</span>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs uppercase tracking-wider mb-1 block" style={{ color: 'rgba(150,200,230,0.6)' }}>Имя и фамилия</label>
-              <input
-                value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: 'rgba(13,59,110,0.45)' }}>Имя и фамилия</label>
+              <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                 placeholder="Иван Петров"
-                className="w-full rounded-xl px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-cyan-500/50"
-                style={{ background: 'rgba(0,30,70,0.6)', border: '1px solid rgba(0,150,200,0.3)', color: 'rgba(200,230,250,0.9)', fontFamily: 'Golos Text' }}
-              />
+                className="sea-input w-full px-3 py-2.5 text-sm" />
             </div>
             <div>
-              <label className="text-xs uppercase tracking-wider mb-1 block" style={{ color: 'rgba(150,200,230,0.6)' }}>Отдел</label>
-              <input
-                value={form.department}
-                onChange={e => setForm(f => ({ ...f, department: e.target.value }))}
+              <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: 'rgba(13,59,110,0.45)' }}>Отдел</label>
+              <input value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))}
                 placeholder="Отдел продаж"
-                className="w-full rounded-xl px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-cyan-500/50"
-                style={{ background: 'rgba(0,30,70,0.6)', border: '1px solid rgba(0,150,200,0.3)', color: 'rgba(200,230,250,0.9)', fontFamily: 'Golos Text' }}
-              />
+                className="sea-input w-full px-3 py-2.5 text-sm" />
             </div>
           </div>
           <div className="mt-3">
-            <label className="text-xs uppercase tracking-wider mb-2 block" style={{ color: 'rgba(150,200,230,0.6)' }}>Аватар</label>
+            <label className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: 'rgba(13,59,110,0.45)' }}>Аватар</label>
             <div className="flex gap-2 flex-wrap">
-              {AVATARS.map(avatar => (
-                <button
-                  key={avatar}
-                  onClick={() => setForm(f => ({ ...f, avatar }))}
-                  className={`text-2xl p-2 rounded-lg transition-all ${form.avatar === avatar ? 'scale-125' : 'opacity-60 hover:opacity-100'}`}
-                  style={{ background: form.avatar === avatar ? 'rgba(0,150,200,0.3)' : 'rgba(0,20,50,0.3)', border: `1px solid ${form.avatar === avatar ? 'rgba(0,200,255,0.5)' : 'transparent'}` }}
-                >
-                  {avatar}
+              {AVATARS.map(av => (
+                <button key={av} onClick={() => setForm(f => ({ ...f, avatar: av }))}
+                  className={`text-2xl p-2 rounded-xl transition-all ${form.avatar === av ? 'scale-110' : 'opacity-50 hover:opacity-80'}`}
+                  style={{
+                    background: form.avatar === av ? 'rgba(14,127,194,0.12)' : 'rgba(14,127,194,0.04)',
+                    border: `1px solid ${form.avatar === av ? 'rgba(14,127,194,0.4)' : 'rgba(14,127,194,0.1)'}`,
+                  }}>
+                  {av}
                 </button>
               ))}
             </div>
           </div>
           <div className="flex gap-3 mt-4">
-            <button onClick={handleSubmit} className="btn-gold px-6 py-2 rounded-xl text-sm font-russo">
-              ✅ Добавить
+            <button onClick={handleSubmit} className="btn-gold px-6 py-2.5 rounded-xl text-sm flex items-center gap-2">
+              <Icon name="Check" size={15} /> Добавить
             </button>
-            <button onClick={() => setShowForm(false)} className="px-6 py-2 rounded-xl text-sm transition-all hover:bg-white/5"
-              style={{ border: '1px solid rgba(100,150,200,0.3)', color: 'rgba(150,200,230,0.7)' }}>
-              Отмена
-            </button>
+            <button onClick={() => setShowForm(false)} className="btn-ghost px-6 py-2.5 rounded-xl text-sm">Отмена</button>
           </div>
         </div>
       )}
@@ -143,31 +132,33 @@ export default function Players({ players, onAddPlayer }: PlayersProps) {
       {/* Players grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {players.map((player, idx) => (
-          <div key={player.id} className="sea-card p-4 flex items-start gap-3 hover:scale-105 transition-all animate-fade-in"
-            style={{ animationDelay: `${idx * 0.08}s` }}>
-            <span className="text-3xl">{player.avatar}</span>
+          <div key={player.id}
+            className="sea-card p-4 flex items-start gap-3 hover:scale-[1.02] transition-all animate-fade-in"
+            style={{ animationDelay: `${idx * 0.07}s` }}>
+            <span className="text-3xl leading-none mt-0.5">{player.avatar}</span>
             <div className="flex-1 min-w-0">
-              <div className="font-semibold" style={{ color: 'rgba(200,230,250,0.95)' }}>{player.name}</div>
-              <div className="text-xs mb-3" style={{ color: 'rgba(100,160,200,0.7)' }}>{player.department}</div>
-              <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+              <div className="font-semibold text-sm" style={{ color: 'var(--sea-navy)' }}>{player.name}</div>
+              <div className="text-xs mb-3" style={{ color: 'rgba(13,59,110,0.42)' }}>{player.department}</div>
+              <div className="grid grid-cols-2 gap-1.5">
                 {[
-                  { label: 'Выстрелов', value: player.shotsTotal },
-                  { label: 'Попаданий', value: player.hitsTotal },
-                  { label: 'Потоплено', value: player.shipsSunk },
-                  { label: 'Бонус', value: `${player.bonusEarned.toLocaleString()}₽`, gold: true },
-                ].map(stat => (
-                  <div key={stat.label}>
-                    <span className="text-xs" style={{ color: 'rgba(100,150,190,0.6)' }}>{stat.label}: </span>
-                    <span className={`text-xs font-semibold ${stat.gold ? 'gold-text' : ''}`}
-                      style={!stat.gold ? { color: 'rgba(150,200,230,0.8)' } : {}}>
-                      {stat.value}
-                    </span>
+                  { iconName: 'Crosshair', label: 'Выстрелов', value: player.shotsTotal,   badge: 'icon-badge-blue' },
+                  { iconName: 'Flame',     label: 'Попаданий',  value: player.hitsTotal,    badge: 'icon-badge-red' },
+                  { iconName: 'Anchor',    label: 'Потоплено',  value: player.shipsSunk,     badge: 'icon-badge-navy' },
+                  { iconName: 'Banknote',  label: 'Бонус',      value: `${player.bonusEarned.toLocaleString()}₽`, badge: 'icon-badge-gold' },
+                ].map(s => (
+                  <div key={s.label} className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl"
+                    style={{ background: 'rgba(14,127,194,0.04)', border: '1px solid rgba(14,127,194,0.1)' }}>
+                    <div className={`icon-badge ${s.badge} w-6 h-6`}><Icon name={s.iconName} size={11} /></div>
+                    <div>
+                      <div className="font-russo text-xs leading-none" style={{ color: 'var(--sea-navy)' }}>{s.value}</div>
+                      <div style={{ fontSize: '9px', color: 'rgba(13,59,110,0.4)' }}>{s.label}</div>
+                    </div>
                   </div>
                 ))}
               </div>
               {player.lastShot && (
-                <div className="mt-2 text-xs" style={{ color: 'rgba(100,150,190,0.5)' }}>
-                  Последний выстрел: {player.lastShot}
+                <div className="mt-2 flex items-center gap-1 text-xs" style={{ color: 'rgba(13,59,110,0.38)' }}>
+                  <Icon name="Clock" size={11} /> {player.lastShot}
                 </div>
               )}
             </div>
@@ -176,10 +167,10 @@ export default function Players({ players, onAddPlayer }: PlayersProps) {
       </div>
 
       {players.length === 0 && (
-        <div className="sea-card p-10 text-center">
-          <div className="text-5xl mb-3">👥</div>
-          <div className="font-russo text-sm mb-2" style={{ color: 'rgba(150,200,230,0.7)' }}>Нет игроков</div>
-          <div className="text-xs" style={{ color: 'rgba(100,150,190,0.5)' }}>Подключи Битрикс24 или добавь вручную</div>
+        <div className="sea-card p-12 text-center">
+          <div className="icon-badge icon-badge-blue w-20 h-20 text-4xl mx-auto mb-4">👥</div>
+          <div className="font-russo text-sm mb-1" style={{ color: 'rgba(13,59,110,0.45)' }}>Нет игроков</div>
+          <div className="text-xs" style={{ color: 'rgba(13,59,110,0.3)' }}>Подключи Битрикс24 или добавь вручную</div>
         </div>
       )}
     </div>
