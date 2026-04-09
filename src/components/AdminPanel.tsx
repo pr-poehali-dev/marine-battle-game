@@ -145,10 +145,11 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
   const getCellStyle = (cell: Cell, row: number, col: number) => {
     const isHovered = hoveredCells.some(c => c.row === row && c.col === col);
     const shot = shots.find(s => s.row === row && s.col === col);
-    if (isHovered) return `cell w-full aspect-square flex items-center justify-center text-xs ${isValidPlacement ? 'place-hover' : 'place-hover-invalid'}`;
-    if (cell.state === 'ship') return shot ? 'cell w-full aspect-square flex items-center justify-center text-xs hit-admin' : 'cell w-full aspect-square flex items-center justify-center text-xs ship-admin';
-    if (shot?.result === 'miss') return 'cell w-full aspect-square flex items-center justify-center text-xs miss';
-    return 'cell w-full aspect-square flex items-center justify-center text-xs';
+    const base = 'cell w-full aspect-square flex items-center justify-center text-xs relative overflow-hidden';
+    if (isHovered) return `${base} ${isValidPlacement ? 'place-hover' : 'place-hover-invalid'}`;
+    if (cell.state === 'ship') return shot ? `${base} hit-admin` : base;
+    if (shot?.result === 'miss') return `${base} miss`;
+    return base;
   };
 
   const ADMIRAL_AVATARS = ['🎖️', '👑', '⚓', '🪖', '🛡️', '🚀', '🌟', '💎'];
@@ -276,9 +277,41 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
                       onMouseLeave={() => setHoveredCells([])}
                       onClick={() => handlePlaceShip(ri, ci)}
                     >
-                      {cell.state === 'ship' && shots.find(s => s.row === ri && s.col === ci) ? <span className="text-sm">🔥</span> : null}
-                      {cell.state === 'ship' && !shots.find(s => s.row === ri && s.col === ci) ? <span style={{ fontSize: '8px', color: 'rgba(14,127,194,0.7)' }}>■</span> : null}
-                      {cell.state !== 'ship' && shots.find(s => s.row === ri && s.col === ci && s.result === 'miss') ? <span style={{ color: 'rgba(14,127,194,0.35)', fontSize: '10px' }}>●</span> : null}
+                      {(() => {
+                        const shot = shots.find(s => s.row === ri && s.col === ci);
+                        if (cell.state === 'ship' && shot) return <span className="text-sm" style={{ filter: 'drop-shadow(0 0 4px rgba(255,100,30,0.8))' }}>🔥</span>;
+                        if (cell.state === 'ship') {
+                          // Find ship orientation for visual
+                          const ship = adminShips.find(s => s.cells.some(c => c.row === ri && c.col === ci));
+                          if (!ship) return null;
+                          const idx = ship.cells.findIndex(c => c.row === ri && c.col === ci);
+                          const isH = ship.cells.length < 2 || ship.cells[0].row === ship.cells[1].row;
+                          const isFirst = idx === 0;
+                          const isLast = idx === ship.cells.length - 1;
+                          const isSingle = ship.cells.length === 1;
+                          const br = isSingle ? '6px' : isH
+                            ? (isFirst ? '6px 2px 2px 6px' : isLast ? '2px 6px 6px 2px' : '2px')
+                            : (isFirst ? '6px 6px 2px 2px' : isLast ? '2px 2px 6px 6px' : '2px');
+                          return (
+                            <div className="absolute inset-0.5 flex items-center justify-center"
+                              style={{
+                                background: 'linear-gradient(160deg,rgba(32,144,224,0.9),rgba(12,60,140,0.85))',
+                                borderRadius: br,
+                                boxShadow: '0 1px 6px rgba(62,200,255,0.35)',
+                              }}>
+                              {isSingle && <span style={{ fontSize: '10px' }}>🚤</span>}
+                              {!isSingle && isFirst && <span style={{ fontSize: '9px', opacity: 0.9 }}>{isH ? '◀' : '▲'}</span>}
+                              {!isSingle && isLast && <span style={{ fontSize: '9px', opacity: 0.9 }}>{isH ? '▶' : '▼'}</span>}
+                            </div>
+                          );
+                        }
+                        if (shot?.result === 'miss') return (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span style={{ fontSize: '13px', color: 'rgba(62,200,255,0.85)', fontWeight: 'bold' }}>●</span>
+                          </div>
+                        );
+                        return null;
+                      })()}
                     </div>
                   ))}
                 </div>

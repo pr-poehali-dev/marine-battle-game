@@ -96,174 +96,359 @@ const FAQ = [
   { q: 'Есть ли пробный период?', a: 'Да, 14 дней бесплатно на тарифе «Фрегат» без ввода карты. Просто установите из маркетплейса.' },
 ];
 
-/* ── Анимированная демо-игра ── */
-const DEMO_COLS = ['А','Б','В','Г','Д'];
-const DEMO_ROWS = ['1','2','3','4','5'];
+function sleep(ms: number) { return new Promise(r => setTimeout(r, ms)); }
 
-type DemoState = 'idle' | 'aiming' | 'shooting' | 'hit' | 'bonus';
+/* ══════════════════════════════════════════
+   ПОЛНАЯ ДЕМО-АНИМАЦИЯ ПРИЛОЖЕНИЯ
+   Циклически показывает 4 экрана:
+   1. Игровое поле — выстрел, попадание, бонус
+   2. Таблица лидеров
+   3. Панель адмирала (расстановка)
+   4. История выстрелов
+══════════════════════════════════════════ */
+type AppScreen = 'game' | 'leaderboard' | 'admin' | 'history';
 
-function GameDemo() {
-  const [phase, setPhase] = useState<DemoState>('idle');
-  const [hitCell] = useState({ r: 2, c: 3 });
+function AppDemo() {
+  const [screen, setScreen] = useState<AppScreen>('game');
+  const [gamePhase, setGamePhase] = useState<'idle'|'aim'|'hit'|'bonus'>('idle');
   const [showBonus, setShowBonus] = useState(false);
-  const [sunkEffect, setSunkEffect] = useState(false);
+  const [adminPhase, setAdminPhase] = useState<'empty'|'ship1'|'ship2'|'done'>('empty');
 
-  // Ships on demo board: 3-deck horizontal at row 2, cols 1-3
-  const shipCells = [{r:2,c:1},{r:2,c:2},{r:2,c:3}];
-  const isShip = (r: number, c: number) => shipCells.some(s => s.r===r && s.c===c);
-  const isHit  = (r: number, c: number) => phase !== 'idle' && phase !== 'aiming' && r===hitCell.r && c===hitCell.c;
+  // Ships on 5×5 demo grid
+  const COLS5 = ['А','Б','В','Г','Д'];
+  const shipH = [{r:1,c:1},{r:1,c:2},{r:1,c:3}]; // 3-палубный горизонт
+  const shipV = [{r:3,c:4},{r:4,c:4}];             // 2-палубный верт
+
+  // Game board: miss at (0,3), hit at (2,3)
+  const missCells = [{r:0,c:3}];
+  const hitCells  = [{r:2,c:3}];
+  const aimCell   = {r:2,c:2};
 
   useEffect(() => {
-    const seq = async () => {
-      await sleep(1200);
-      setPhase('aiming');
-      await sleep(900);
-      setPhase('shooting');
-      await sleep(500);
-      setPhase('hit');
-      setSunkEffect(true);
-      await sleep(400);
-      setShowBonus(true);
-      await sleep(2200);
-      setShowBonus(false);
-      setSunkEffect(false);
-      await sleep(600);
-      setPhase('idle');
-      await sleep(800);
-      seq();
+    let cancelled = false;
+    const run = async () => {
+      while (!cancelled) {
+        /* ── Экран 1: Игровое поле ── */
+        setScreen('game'); setGamePhase('idle'); setShowBonus(false);
+        await sleep(900);
+        setGamePhase('aim');
+        await sleep(800);
+        setGamePhase('hit');
+        await sleep(350);
+        setShowBonus(true);
+        await sleep(2200);
+        setShowBonus(false); setGamePhase('idle');
+        await sleep(600);
+
+        /* ── Экран 2: Рейтинг ── */
+        setScreen('leaderboard');
+        await sleep(2800);
+
+        /* ── Экран 3: Панель адмирала ── */
+        setScreen('admin'); setAdminPhase('empty');
+        await sleep(700);
+        setAdminPhase('ship1');
+        await sleep(700);
+        setAdminPhase('ship2');
+        await sleep(600);
+        setAdminPhase('done');
+        await sleep(1600);
+
+        /* ── Экран 4: История ── */
+        setScreen('history');
+        await sleep(2600);
+      }
     };
-    const t = setTimeout(() => seq(), 600);
-    return () => clearTimeout(t);
+    const t = setTimeout(run, 400);
+    return () => { cancelled = true; clearTimeout(t); };
   }, []);
 
-  return (
-    <div className="relative select-none">
-      {/* Glow ring behind board */}
-      <div className="absolute inset-0 rounded-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(11,109,171,0.15), transparent)', filter: 'blur(20px)' }} />
+  const C = '#0a2f5c';
+  const CDIM = 'rgba(10,47,92,0.5)';
+  const cardStyle = {
+    background: 'linear-gradient(145deg,#fff,#eef6fc)',
+    border: '2px solid rgba(10,93,150,0.22)',
+    boxShadow: '0 8px 40px rgba(10,93,150,0.18)',
+    borderRadius: 24,
+    padding: '16px',
+    fontFamily: 'Golos Text,sans-serif',
+    position: 'relative' as const,
+    overflow: 'hidden' as const,
+    minHeight: 340,
+  };
 
-      <div className="relative rounded-3xl p-5"
-        style={{ background: 'linear-gradient(145deg, #fff, #eef6fc)', border: '2px solid rgba(11,109,171,0.22)', boxShadow: '0 8px 40px rgba(11,109,171,0.18)' }}>
-
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-base"
-              style={{ background: 'linear-gradient(135deg,#bdddf5,#92c8ee)', color: '#0b6dab' }}>⚓</div>
-            <span className="font-russo text-sm" style={{ color: '#0a2f5c' }}>Игровое поле</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold"
-            style={{ background: 'rgba(22,163,74,0.1)', border: '1px solid rgba(22,163,74,0.35)', color: '#14803c' }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-green-600 inline-block" />
-            Идёт игра
-          </div>
+  // Header bar always shown
+  const Header = ({ tab }: { tab: string }) => (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+        <div style={{ width:32,height:32,borderRadius:10,background:'linear-gradient(135deg,#b8d8f0,#88bce0)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16 }}>⚓</div>
+        <div>
+          <div style={{ fontFamily:'Russo One,sans-serif', fontSize:13, color:C }}>Морской Бой</div>
+          <div style={{ fontSize:10, color:CDIM }}>Геймификация продаж</div>
         </div>
+      </div>
+      <div style={{ display:'flex', alignItems:'center', gap:4, padding:'3px 8px', borderRadius:20, background:'rgba(22,163,74,0.1)', border:'1px solid rgba(22,163,74,0.35)', fontSize:10, fontWeight:700, color:'#0f6030' }}>
+        <span style={{ width:6,height:6,borderRadius:'50%',background:'#16a34a',display:'inline-block' }} /> Идёт игра
+      </div>
+    </div>
+  );
 
-        {/* Grid */}
-        <div className="flex mb-1">
-          <div className="w-6 shrink-0" />
-          {DEMO_COLS.map(c => (
-            <div key={c} className="flex-1 text-center font-russo"
-              style={{ fontSize: '10px', color: 'rgba(11,109,171,0.5)' }}>{c}</div>
-          ))}
+  // Nav tabs
+  const tabs = [
+    { id:'game',        icon:'🎯', label:'Поле' },
+    { id:'leaderboard', icon:'🏆', label:'Рейтинг' },
+    { id:'history',     icon:'📋', label:'История' },
+    { id:'admin',       icon:'⚓', label:'Адмирал' },
+  ];
+  const Nav = () => (
+    <div style={{ display:'flex', gap:4, marginBottom:12 }}>
+      {tabs.map(t => (
+        <div key={t.id} style={{
+          display:'flex', alignItems:'center', gap:4,
+          padding:'4px 8px', borderRadius:10, fontSize:10, fontWeight:700,
+          background: screen===t.id ? 'rgba(10,93,150,0.14)' : 'transparent',
+          border: screen===t.id ? '1.5px solid rgba(10,93,150,0.38)' : '1.5px solid transparent',
+          color: screen===t.id ? '#0a5d96' : CDIM,
+          cursor: 'default',
+          transition: 'all 0.3s',
+        }}>
+          {t.icon} {t.label}
         </div>
-        {DEMO_ROWS.map((_, ri) => (
-          <div key={ri} className="flex mb-0.5">
-            <div className="w-6 shrink-0 flex items-center justify-end pr-1 font-russo"
-              style={{ fontSize: '10px', color: 'rgba(11,109,171,0.5)' }}>{ri+1}</div>
+      ))}
+    </div>
+  );
+
+  /* ── GAME SCREEN ── */
+  const GameScreen = () => {
+    const COLS5L = ['А','Б','В','Г','Д'];
+    return (
+      <div>
+        {/* Mini board 5×5 */}
+        <div style={{ display:'flex', marginBottom:2 }}>
+          <div style={{ width:18 }} />
+          {COLS5L.map(c => <div key={c} style={{ flex:1, textAlign:'center', fontSize:9, color:CDIM, fontFamily:'Russo One,sans-serif' }}>{c}</div>)}
+        </div>
+        {Array.from({length:5},(_,ri) => (
+          <div key={ri} style={{ display:'flex', marginBottom:2 }}>
+            <div style={{ width:18, fontSize:9, color:CDIM, display:'flex', alignItems:'center', justifyContent:'flex-end', paddingRight:3, fontFamily:'Russo One,sans-serif' }}>{ri+1}</div>
             {Array.from({length:5},(_,ci) => {
-              const aiming = phase==='aiming' && ri===hitCell.r && ci===hitCell.c;
-              const hit    = isHit(ri,ci);
-              const ship   = isShip(ri,ci) && !hit;
+              const isMiss    = missCells.some(c=>c.r===ri&&c.c===ci);
+              const isHit2    = hitCells.some(c=>c.r===ri&&c.c===ci) && gamePhase!=='idle' && gamePhase!=='aim';
+              const isAiming  = gamePhase==='aim' && ri===aimCell.r && ci===aimCell.c;
+              const isNewHit  = gamePhase==='hit' && ri===aimCell.r && ci===aimCell.c;
+              // ship 3-deck horizontal row 1: c=1,2,3
+              const isShip3   = ri===1 && ci>=1 && ci<=3;
+              const isShipSingle = ri===3 && ci===0;
               return (
-                <div key={ci} className="flex-1 mx-0.5 aspect-square flex items-center justify-center rounded"
-                  style={{
-                    fontSize: '12px',
-                    border: hit
-                      ? '1.5px solid rgba(217,64,16,0.7)'
-                      : aiming
-                        ? '1.5px solid rgba(11,109,171,0.7)'
-                        : ship
-                          ? '1.5px solid rgba(21,136,204,0.6)'
-                          : '1.5px solid rgba(11,109,171,0.18)',
-                    background: hit
-                      ? 'linear-gradient(135deg,rgba(217,64,16,0.88),rgba(180,20,20,0.72))'
-                      : aiming
-                        ? 'rgba(11,109,171,0.15)'
-                        : ship
-                          ? 'linear-gradient(135deg,rgba(24,96,160,0.82),rgba(10,47,92,0.72))'
-                          : 'rgba(220,238,252,0.55)',
-                    transition: 'all 0.2s',
-                    transform: sunkEffect && isShip(ri,ci) ? 'scale(1.08)' : 'scale(1)',
-                    boxShadow: hit ? '0 0 8px rgba(217,64,16,0.4)' : 'none',
-                  }}>
-                  {hit ? '🔥' : aiming ? '🎯' : ship ? <span style={{fontSize:'8px',color:'rgba(200,230,255,0.7)'}}>■</span> : null}
+                <div key={ci} style={{
+                  flex:1, marginLeft:2,
+                  aspectRatio:'1',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  position:'relative', overflow:'hidden',
+                  borderRadius:4,
+                  border: isHit2||isNewHit ? '1.5px solid rgba(200,52,0,0.75)' : isMiss ? '1.5px solid rgba(18,118,184,0.65)' : isAiming ? '1.5px solid rgba(10,93,150,0.7)' : '1.5px solid rgba(10,93,150,0.2)',
+                  background: isHit2||isNewHit ? 'linear-gradient(135deg,rgba(200,52,0,0.88),rgba(140,10,0,0.75))' : isMiss ? 'linear-gradient(135deg,rgba(18,118,184,0.28),rgba(10,80,160,0.18))' : isAiming ? 'rgba(10,93,150,0.16)' : isShip3||isShipSingle ? 'linear-gradient(160deg,rgba(18,118,184,0.9),rgba(7,46,100,0.85))' : 'rgba(212,232,245,0.6)',
+                  transition: 'all 0.2s',
+                  fontSize:11,
+                }}>
+                  {(isHit2||isNewHit) && <span style={{filter:'drop-shadow(0 0 3px rgba(255,100,30,0.8))'}}>🔥</span>}
+                  {isMiss && <span style={{color:'rgba(18,118,184,0.85)',fontWeight:'bold',fontSize:10}}>●</span>}
+                  {isAiming && <span>🎯</span>}
+                  {!isHit2 && !isNewHit && !isMiss && !isAiming && isShip3 && (
+                    <div style={{ position:'absolute', inset:2, background:'linear-gradient(160deg,rgba(32,144,224,0.9),rgba(12,60,140,0.85))', borderRadius: ci===1?'5px 2px 2px 5px': ci===3?'2px 5px 5px 2px':'2px', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      {ci===1 && <span style={{fontSize:8,opacity:0.9}}>◀</span>}
+                      {ci===3 && <span style={{fontSize:8,opacity:0.9}}>▶</span>}
+                    </div>
+                  )}
+                  {!isHit2 && !isNewHit && !isMiss && !isAiming && isShipSingle && (
+                    <span style={{fontSize:10}}>🚤</span>
+                  )}
                 </div>
               );
             })}
           </div>
         ))}
 
-        {/* Explosion ring effect */}
-        {sunkEffect && (
-          <div className="absolute pointer-events-none" style={{
-            top: `calc(${(hitCell.r/5)*100}% + 36px)`,
-            left: `calc(${(hitCell.c/5)*100}% + 28px)`,
-          }}>
-            <div style={{
-              width: 40, height: 40,
-              borderRadius: '50%',
-              border: '3px solid rgba(217,64,16,0.7)',
-              position: 'absolute',
-              animation: 'explode-ring 0.7s ease-out forwards',
-            }} />
-          </div>
-        )}
-
         {/* Bonus popup */}
         {showBonus && (
-          <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5">
-            <div className="px-3 py-2 rounded-2xl font-russo text-sm shadow-lg"
-              style={{
-                background: 'linear-gradient(135deg,#f0b820,#d06000)',
-                color: '#3a1800',
-                animation: 'coin-pop 0.5s ease-out',
-                boxShadow: '0 4px 16px rgba(200,120,0,0.45)',
-              }}>
+          <div style={{ position:'absolute', top:16, right:16, display:'flex', flexDirection:'column', gap:6, alignItems:'flex-end', zIndex:10 }}>
+            <div style={{ padding:'6px 12px', borderRadius:14, fontFamily:'Russo One,sans-serif', fontSize:13, background:'linear-gradient(135deg,#d88a14,#905000)', color:'#fff', boxShadow:'0 4px 14px rgba(180,100,0,0.45)', animation:'coin-pop 0.5s ease-out' }}>
               💰 +3 000₽
             </div>
-            <div className="px-3 py-1.5 rounded-xl text-xs font-bold shadow"
-              style={{
-                background: '#fff',
-                color: '#c01818',
-                border: '1.5px solid rgba(217,64,16,0.35)',
-                animation: 'coin-pop 0.5s ease-out 0.12s both',
-              }}>
+            <div style={{ padding:'4px 10px', borderRadius:10, fontSize:11, fontWeight:700, background:'#fff', color:'#c01818', border:'1.5px solid rgba(200,52,0,0.35)', animation:'coin-pop 0.5s ease-out 0.12s both' }}>
               💥 Корабль потоплен!
             </div>
           </div>
         )}
 
-        {/* Bottom bar */}
-        <div className="mt-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">👨‍💼</span>
+        {/* Player bar */}
+        <div style={{ marginTop:10, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 10px', borderRadius:12, background:'rgba(10,93,150,0.06)', border:'1.5px solid rgba(10,93,150,0.12)' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+            <span style={{fontSize:18}}>👨‍💼</span>
             <div>
-              <div className="text-xs font-semibold" style={{color:'#0a2f5c'}}>Алексей П.</div>
-              <div className="text-xs" style={{color:'rgba(10,47,92,0.5)'}}>Сделка: ООО Максимум</div>
+              <div style={{fontSize:11,fontWeight:700,color:C}}>Алексей Петров</div>
+              <div style={{fontSize:10,color:CDIM}}>ООО Максимум · 850 000₽</div>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-xs font-semibold" style={{color:'#0a2f5c'}}>Бонусов</div>
-            <div className="font-russo text-sm" style={{color:'#d48a10'}}>3 000₽</div>
+          <div style={{ textAlign:'right' }}>
+            <div style={{fontSize:10,color:CDIM}}>Бонус</div>
+            <div style={{fontFamily:'Russo One,sans-serif',fontSize:13,color:'#b87000'}}>3 000₽</div>
           </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ── LEADERBOARD SCREEN ── */
+  const LeaderboardScreen = () => {
+    const players = [
+      { name:'Игорь Волков',   dept:'Розница',     bonus:5000, sunk:2, av:'🧑‍🎯' },
+      { name:'Алексей Петров', dept:'Отдел продаж', bonus:3000, sunk:1, av:'👨‍💼' },
+      { name:'Мария Сидорова', dept:'Отдел продаж', bonus:1000, sunk:1, av:'👩‍💼' },
+      { name:'Елена Новикова', dept:'B2B',          bonus:0,    sunk:0, av:'👩‍🔬' },
+    ];
+    const medals = ['🥇','🥈','🥉',''];
+    return (
+      <div>
+        {/* Top 3 mini podium */}
+        <div style={{ display:'flex', gap:6, marginBottom:10, height:60 }}>
+          {[players[1],players[0],players[2]].map((p,i) => {
+            const ri = i===0?1:i===1?0:2;
+            return (
+              <div key={p.name} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'flex-end', borderRadius:12, padding:'6px 4px', background:ri===0?'rgba(212,138,16,0.08)':'rgba(10,93,150,0.06)', border:`1.5px solid ${ri===0?'rgba(212,138,16,0.35)':'rgba(10,93,150,0.15)'}` }}>
+                <span style={{fontSize:14}}>{medals[ri]}</span>
+                <span style={{fontSize:16}}>{p.av}</span>
+                <div style={{fontSize:9,fontWeight:700,color:ri===0?'#b87000':'#0a5d96'}}>{p.bonus.toLocaleString()}₽</div>
+              </div>
+            );
+          })}
+        </div>
+        {/* Table */}
+        {players.map((p,i) => (
+          <div key={p.name} style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 8px', borderRadius:10, marginBottom:4, background:i===0?'rgba(212,138,16,0.06)':'transparent', border:`1.5px solid ${i===0?'rgba(212,138,16,0.2)':'rgba(10,93,150,0.08)'}` }}>
+            <span style={{fontSize:14}}>{medals[i]||<span style={{fontSize:11,color:CDIM}}>{i+1}</span>}</span>
+            <span style={{fontSize:16}}>{p.av}</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:11,fontWeight:700,color:C}}>{p.name}</div>
+              <div style={{fontSize:9,color:CDIM}}>{p.dept}</div>
+            </div>
+            <div style={{fontFamily:'Russo One,sans-serif',fontSize:12,color:p.bonus>0?'#b87000':'rgba(10,47,92,0.35)'}}>
+              {p.bonus>0?`+${p.bonus.toLocaleString()}₽`:'—'}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  /* ── ADMIN SCREEN ── */
+  const AdminScreen = () => {
+    const showShip1 = adminPhase==='ship1'||adminPhase==='ship2'||adminPhase==='done';
+    const showShip2 = adminPhase==='ship2'||adminPhase==='done';
+    const ship1 = [{r:1,c:0},{r:1,c:1},{r:1,c:2}];
+    const ship2 = [{r:3,c:3},{r:3,c:4}];
+    return (
+      <div>
+        <div style={{ fontSize:10, fontWeight:700, color:CDIM, marginBottom:8, display:'flex', alignItems:'center', gap:6 }}>
+          <span style={{ padding:'2px 8px', borderRadius:8, background:'rgba(10,93,150,0.1)', border:'1px solid rgba(10,93,150,0.22)', color:'#0a5d96' }}>🗺️ Расстановка</span>
+          <span style={{ color:'rgba(10,47,92,0.4)' }}>Кликните на поле чтобы поставить корабль</span>
+        </div>
+        <div style={{ display:'flex', marginBottom:2 }}>
+          <div style={{ width:16 }} />
+          {COLS5.map(c => <div key={c} style={{ flex:1, textAlign:'center', fontSize:9, color:CDIM, fontFamily:'Russo One,sans-serif' }}>{c}</div>)}
+        </div>
+        {Array.from({length:5},(_,ri) => (
+          <div key={ri} style={{ display:'flex', marginBottom:2 }}>
+            <div style={{ width:16, fontSize:9, color:CDIM, display:'flex', alignItems:'center', justifyContent:'flex-end', paddingRight:2, fontFamily:'Russo One,sans-serif' }}>{ri+1}</div>
+            {Array.from({length:5},(_,ci) => {
+              const isS1 = showShip1 && ship1.some(c=>c.r===ri&&c.c===ci);
+              const isS2 = showShip2 && ship2.some(c=>c.r===ri&&c.c===ci);
+              const sIdx1 = ship1.findIndex(c=>c.r===ri&&c.c===ci);
+              const sIdx2 = ship2.findIndex(c=>c.r===ri&&c.c===ci);
+              return (
+                <div key={ci} style={{
+                  flex:1, marginLeft:2, aspectRatio:'1', position:'relative', overflow:'hidden',
+                  borderRadius:4,
+                  border: isS1||isS2 ? '1.5px solid rgba(62,180,240,0.7)' : '1.5px solid rgba(10,93,150,0.18)',
+                  background: isS1||isS2 ? 'linear-gradient(160deg,rgba(18,118,184,0.88),rgba(7,46,100,0.82))' : 'rgba(212,232,245,0.55)',
+                  transition:'all 0.35s',
+                  boxShadow: isS1||isS2 ? '0 1px 6px rgba(10,93,150,0.35)' : 'none',
+                }}>
+                  {isS1 && (
+                    <div style={{ position:'absolute', inset:2, background:'linear-gradient(160deg,rgba(32,144,224,0.9),rgba(12,60,140,0.85))', borderRadius: sIdx1===0?'5px 2px 2px 5px':sIdx1===2?'2px 5px 5px 2px':'2px', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      {sIdx1===0 && <span style={{fontSize:8,opacity:0.9}}>◀</span>}
+                      {sIdx1===2 && <span style={{fontSize:8,opacity:0.9}}>▶</span>}
+                    </div>
+                  )}
+                  {isS2 && (
+                    <div style={{ position:'absolute', inset:2, background:'linear-gradient(160deg,rgba(32,144,224,0.9),rgba(12,60,140,0.85))', borderRadius: sIdx2===0?'5px 5px 2px 2px':'2px 2px 5px 5px', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      {sIdx2===0 && <span style={{fontSize:8,opacity:0.9}}>▲</span>}
+                      {sIdx2===1 && <span style={{fontSize:8,opacity:0.9}}>▼</span>}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+        <div style={{ marginTop:8, display:'flex', gap:6 }}>
+          {showShip1 && <div style={{ padding:'3px 10px', borderRadius:8, background:'rgba(10,93,150,0.08)', border:'1.5px solid rgba(10,93,150,0.22)', fontSize:10, fontWeight:700, color:'#0a5d96' }}>🛥️ 3-пал. · +3000₽</div>}
+          {showShip2 && <div style={{ padding:'3px 10px', borderRadius:8, background:'rgba(10,93,150,0.08)', border:'1.5px solid rgba(10,93,150,0.22)', fontSize:10, fontWeight:700, color:'#0a5d96' }}>⛵ 2-пал. · +2000₽</div>}
+        </div>
+      </div>
+    );
+  };
+
+  /* ── HISTORY SCREEN ── */
+  const HistoryScreen = () => {
+    const rows = [
+      { av:'🧑‍🎯', name:'Игорь Волков',   coord:'В6', res:'sunk', bonus:3000, deal:'ИП Кузнецов' },
+      { av:'👨‍💼', name:'Алексей Петров', coord:'Д3', res:'sunk', bonus:3000, deal:'ООО Максимум' },
+      { av:'👩‍💼', name:'Мария Сидорова', coord:'Б8', res:'hit',  bonus:0,    deal:'ИП Смирнов' },
+      { av:'👨‍💻', name:'Дмитрий Козлов', coord:'И5', res:'miss', bonus:0,    deal:'ООО Техно' },
+    ];
+    return (
+      <div>
+        <div style={{ display:'flex', gap:6, marginBottom:10 }}>
+          {[{label:'Выстрелов',val:'24',c:'#0a5d96'},{label:'Потоплено',val:'6',c:'#c03400'},{label:'Выплачено',val:'16 000₽',c:'#b87000'}].map(s => (
+            <div key={s.label} style={{ flex:1, padding:'6px 8px', borderRadius:10, background:'rgba(10,93,150,0.07)', border:'1.5px solid rgba(10,93,150,0.14)', textAlign:'center' }}>
+              <div style={{ fontFamily:'Russo One,sans-serif', fontSize:14, color:s.c }}>{s.val}</div>
+              <div style={{ fontSize:9, color:CDIM }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+        {rows.map((r,i) => (
+          <div key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 8px', borderRadius:10, marginBottom:4, background:r.res==='sunk'?'rgba(212,138,16,0.05)':r.res==='hit'?'rgba(200,52,0,0.04)':'transparent', border:'1.5px solid rgba(10,93,150,0.08)' }}>
+            <span style={{fontSize:16}}>{r.av}</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:10,fontWeight:700,color:C}}>{r.name}</div>
+              <div style={{fontSize:9,color:CDIM}}>{r.deal}</div>
+            </div>
+            <div style={{ fontFamily:'Russo One,sans-serif', fontSize:10, padding:'2px 7px', borderRadius:20, background:r.res==='sunk'?'linear-gradient(135deg,#d88a14,#905000)':r.res==='hit'?'linear-gradient(135deg,#d83030,#900000)':'rgba(18,118,184,0.12)', color:r.res==='sunk'?'#fff':r.res==='hit'?'#fff':'#0a5d96', border:r.res==='miss'?'1.5px solid rgba(18,118,184,0.5)':'none' }}>
+              {r.res==='sunk'?'💥 Потоплен':r.res==='hit'?'🔥 Попадание':'💧 Промах'}
+            </div>
+            {r.bonus>0 && <div style={{fontFamily:'Russo One,sans-serif',fontSize:11,color:'#b87000',whiteSpace:'nowrap'}}>+{r.bonus.toLocaleString()}₽</div>}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="relative select-none">
+      <div style={cardStyle}>
+        <Header tab={screen} />
+        <Nav />
+        <div style={{ transition:'opacity 0.3s', opacity:1 }}>
+          {screen==='game'        && <GameScreen />}
+          {screen==='leaderboard' && <LeaderboardScreen />}
+          {screen==='admin'       && <AdminScreen />}
+          {screen==='history'     && <HistoryScreen />}
         </div>
       </div>
     </div>
   );
 }
-
-function sleep(ms: number) { return new Promise(r => setTimeout(r, ms)); }
 
 /* ══════════════════════════════════════════ */
 export default function LandingPage() {
@@ -371,10 +556,10 @@ export default function LandingPage() {
           <div className="relative">
             <div className="absolute -top-4 -left-4 w-20 h-20 rounded-full"
               style={{ background: 'radial-gradient(circle, rgba(11,109,171,0.15), transparent)', filter: 'blur(15px)' }} />
-            <GameDemo />
+            <AppDemo />
             <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap"
               style={{ background: '#fff', border: '1.5px solid rgba(11,109,171,0.25)', color: '#0b6dab', boxShadow: '0 2px 10px rgba(11,109,171,0.15)' }}>
-              🎮 Живая демонстрация игры
+              🎮 Живая демонстрация приложения
             </div>
           </div>
         </div>
