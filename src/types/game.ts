@@ -21,6 +21,7 @@ export interface Player {
   name: string;
   department: string;
   avatar: string;
+  avatarUrl?: string;
   shotsTotal: number;
   hitsTotal: number;
   shipsSunk: number;

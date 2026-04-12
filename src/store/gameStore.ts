@@ -117,6 +117,11 @@ export function useGameStore() {
     setPlayers(prev => [...prev, newPlayer]);
   }, []);
 
+  const removePlayer = useCallback((id: string) => {
+    setPlayers(prev => prev.filter(p => p.id !== id));
+    setSelectedPlayer((prev: Player | null) => prev?.id === id ? null : prev);
+  }, []);
+
   const resetGame = useCallback(() => {
     setBoard(createEmptyBoard());
     setShips([]);
@@ -127,6 +132,6 @@ export function useGameStore() {
   return {
     board, ships, shots, players, gameActive, selectedPlayer, lastExplosion,
     setBoard, setShips, setShots, setGameActive, setSelectedPlayer,
-    placeShipOnBoard, fireShot, addPlayer, resetGame,
+    placeShipOnBoard, fireShot, addPlayer, removePlayer, resetGame,
   };
 }

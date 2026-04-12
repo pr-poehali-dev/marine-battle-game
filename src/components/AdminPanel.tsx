@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Cell, Ship, COLS, ROWS, GRID_SIZE } from '@/types/game';
 import Icon from '@/components/ui/icon';
+import ShipSVG from '@/components/ShipSVG';
 
 interface Admiral {
   id: string;
@@ -145,7 +146,7 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
   const getCellStyle = (cell: Cell, row: number, col: number) => {
     const isHovered = hoveredCells.some(c => c.row === row && c.col === col);
     const shot = shots.find(s => s.row === row && s.col === col);
-    const base = 'cell w-full aspect-square flex items-center justify-center text-xs relative overflow-hidden';
+    const base = 'cell w-full aspect-square flex items-center justify-center text-xs relative overflow-visible';
     if (isHovered) return `${base} ${isValidPlacement ? 'place-hover' : 'place-hover-invalid'}`;
     if (cell.state === 'ship') return shot ? `${base} hit-admin` : base;
     if (shot?.result === 'miss') return `${base} miss`;
@@ -281,27 +282,33 @@ export default function AdminPanel({ board, ships, shots, gameActive, onShipsCha
                         const shot = shots.find(s => s.row === ri && s.col === ci);
                         if (cell.state === 'ship' && shot) return <span className="text-sm" style={{ filter: 'drop-shadow(0 0 4px rgba(255,100,30,0.8))' }}>🔥</span>;
                         if (cell.state === 'ship') {
-                          // Find ship orientation for visual
                           const ship = adminShips.find(s => s.cells.some(c => c.row === ri && c.col === ci));
                           if (!ship) return null;
-                          const idx = ship.cells.findIndex(c => c.row === ri && c.col === ci);
                           const isH = ship.cells.length < 2 || ship.cells[0].row === ship.cells[1].row;
-                          const isFirst = idx === 0;
-                          const isLast = idx === ship.cells.length - 1;
-                          const isSingle = ship.cells.length === 1;
-                          const br = isSingle ? '6px' : isH
-                            ? (isFirst ? '6px 2px 2px 6px' : isLast ? '2px 6px 6px 2px' : '2px')
-                            : (isFirst ? '6px 6px 2px 2px' : isLast ? '2px 2px 6px 6px' : '2px');
+                          // Only render SVG at the "head" cell (min col for H, min row for V)
+                          const head = ship.cells.reduce((a, b) =>
+                            isH ? (a.col < b.col ? a : b) : (a.row < b.row ? a : b)
+                          );
+                          if (head.row !== ri || head.col !== ci) return null;
+                          // SVG covers entire ship — positioned absolutely relative to head cell
+                          // Each cell is ~100%/GRID_SIZE wide — we use pixel approach via inline style
+                          const shipLen = ship.cells.length;
                           return (
-                            <div className="absolute inset-0.5 flex items-center justify-center"
-                              style={{
-                                background: 'linear-gradient(160deg,rgba(32,144,224,0.9),rgba(12,60,140,0.85))',
-                                borderRadius: br,
-                                boxShadow: '0 1px 6px rgba(62,200,255,0.35)',
-                              }}>
-                              {isSingle && <span style={{ fontSize: '10px' }}>🚤</span>}
-                              {!isSingle && isFirst && <span style={{ fontSize: '9px', opacity: 0.9 }}>{isH ? '◀' : '▲'}</span>}
-                              {!isSingle && isLast && <span style={{ fontSize: '9px', opacity: 0.9 }}>{isH ? '▶' : '▼'}</span>}
+                            <div style={{
+                              position: 'absolute',
+                              top: 1, left: 1,
+                              width: isH ? `calc(${shipLen * 100}% + ${(shipLen - 1) * 3}px)` : 'calc(100% - 2px)',
+                              height: isH ? 'calc(100% - 2px)' : `calc(${shipLen * 100}% + ${(shipLen - 1) * 3}px)`,
+                              zIndex: 5,
+                              pointerEvents: 'none',
+                            }}>
+                              <ShipSVG
+                                size={ship.size}
+                                isVertical={!isH}
+                                isHit={ship.hits > 0 && !ship.sunk}
+                                isSunk={ship.sunk}
+                                style={{ width: '100%', height: '100%' }}
+                              />
                             </div>
                           );
                         }

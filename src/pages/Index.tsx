@@ -6,9 +6,10 @@ import Leaderboard from '@/components/Leaderboard';
 import ShotHistory from '@/components/ShotHistory';
 import Players from '@/components/Players';
 import Statistics from '@/components/Statistics';
+import Bitrix24Setup from '@/components/Bitrix24Setup';
 import Icon from '@/components/ui/icon';
 
-type Tab = 'game' | 'admin' | 'leaderboard' | 'history' | 'players' | 'stats';
+type Tab = 'game' | 'admin' | 'leaderboard' | 'history' | 'players' | 'stats' | 'setup';
 
 const TABS: { id: Tab; label: string; iconName: string; adminOnly?: boolean }[] = [
   { id: 'game',        label: 'Поле',      iconName: 'Crosshair' },
@@ -16,6 +17,7 @@ const TABS: { id: Tab; label: string; iconName: string; adminOnly?: boolean }[] 
   { id: 'history',     label: 'История',   iconName: 'ScrollText' },
   { id: 'stats',       label: 'Статистика',iconName: 'BarChart3' },
   { id: 'players',     label: 'Игроки',    iconName: 'Users' },
+  { id: 'setup',       label: 'Настройка', iconName: 'Settings' },
   { id: 'admin',       label: 'Адмирал',   iconName: 'ShieldCheck', adminOnly: true },
 ];
 
@@ -83,7 +85,7 @@ export default function Index() {
   const {
     board, ships, shots, players, gameActive, selectedPlayer, lastExplosion,
     setShips, setBoard, setGameActive, setSelectedPlayer,
-    placeShipOnBoard, fireShot, addPlayer, resetGame,
+    placeShipOnBoard, fireShot, addPlayer, removePlayer, resetGame,
   } = useGameStore();
 
   const handleShipsChange = (newShips: typeof ships) => {
@@ -111,10 +113,10 @@ export default function Index() {
                   }} />
               </div>
               <div>
-                <h1 className="font-russo text-xl leading-tight" style={{ color: 'var(--sea-navy)' }}>
+                <h1 className="font-russo text-xl leading-tight" style={{ color: 'var(--sea-text)' }}>
                   Морской Бой
                 </h1>
-                <div className="text-xs font-semibold" style={{ color: 'var(--sea-text-dim)' }}>
+                <div className="text-xs font-bold" style={{ color: 'var(--sea-text-dim)' }}>
                   Геймификация продаж · Битрикс24
                 </div>
               </div>
@@ -187,8 +189,9 @@ export default function Index() {
         )}
         {activeTab === 'leaderboard' && <Leaderboard players={players} />}
         {activeTab === 'history'     && <ShotHistory shots={shots} />}
-        {activeTab === 'players'     && <Players players={players} onAddPlayer={addPlayer} />}
+        {activeTab === 'players'     && <Players players={players} onAddPlayer={addPlayer} onRemovePlayer={removePlayer} />}
         {activeTab === 'stats'       && <Statistics players={players} shots={shots} ships={ships} />}
+        {activeTab === 'setup'       && <Bitrix24Setup />}
       </main>
 
       {/* ── FOOTER ── */}
